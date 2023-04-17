@@ -9,9 +9,17 @@
             margin: 0;
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.151.3/three.min.js"
-        integrity="sha512-He29azWb6CQ0yzDGpF61I/SIWlAclbP/Zh95diyYHwpN0VgkH3rtJKJkcApFJG517GxurJQ2UB676HOhB6pyBQ=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "./build/three.module.js",
+            "three/addons/": "./jsm/"
+        }
+    }
+    </script>
+
+
 </head>
 
 <body>

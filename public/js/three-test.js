@@ -1,4 +1,4 @@
-// import * as THREE from 'three';
+import * as THREE from 'three';
 
 // Create an empty scene
 var scene = new THREE.Scene();
