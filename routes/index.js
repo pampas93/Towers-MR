@@ -14,5 +14,9 @@ router.get('/three-webxr', function (req, res, next) {
   res.render('three-webxr', {});
 });
 
+router.get('/ar-hittest', function (req, res, next) {
+  res.render('ar-hittest', {});
+});
+
 
 module.exports = router;
