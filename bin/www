@@ -7,6 +7,9 @@
 var app = require('../app');
 var debug = require('debug')('webxr-samples-ratk:server');
 var http = require('http');
+const https = require('https');
+const fs = require('fs');
+var path = require('path');
 
 /**
  * Get port from environment and store in Express.
@@ -15,11 +18,20 @@ var http = require('http');
 var port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
+var certPath = path.join(__dirname, '..', 'cert', 'server.key');
+
+const options = {
+  key: fs.readFileSync(path.join(__dirname, '..', 'cert', 'server.key')),
+  cert: fs.readFileSync(path.join(__dirname, '..', 'cert', 'server.cert'))
+};
+
 /**
- * Create HTTP server.
+ * Create HTTPS server.
  */
 
-var server = http.createServer(app);
+// var server = http.createServer(app);
+
+var server = https.createServer(options, app);
 
 /**
  * Listen on provided port, on all network interfaces.
