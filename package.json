@@ -1,23 +1,33 @@
 {
-  "name": "webxr-samples-ratk",
-  "version": "0.0.0",
-  "private": true,
+  "name": "webxr-with-webpack",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
   "scripts": {
-    "start": "nodemon ./bin/www"
+    "start": "webpack serve --open"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/preset-env": "^7.21.4",
+    "babel-loader": "^9.1.2",
+    "clean-webpack-plugin": "^4.0.0",
+    "copy-webpack-plugin": "^11.0.0",
+    "dotenv-webpack": "^8.0.1",
+    "html-webpack-plugin": "^5.5.1",
+    "https": "^1.0.0",
+    "webpack": "^5.80.0",
+    "webpack-bundle-analyzer": "^4.8.0",
+    "webpack-cli": "^5.0.1",
+    "webpack-dev-server": "^4.13.3",
+    "webpack-merge": "^5.8.0"
   },
   "dependencies": {
-    "cookie-parser": "~1.4.4",
-    "debug": "~2.6.9",
-    "ejs": "^3.1.9",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
     "express": "^4.18.2",
-    "fs": "^0.0.1-security",
-    "http-errors": "~1.6.3",
-    "https": "^1.0.0",
-    "lodash": "^4.17.21",
-    "lodash-es": "^4.17.21",
-    "morgan": "~1.9.1",
-    "nodemon": "^2.0.22",
-    "ratk": "^0.1.1",
+    "morgan": "^1.10.0",
     "three": "^0.151.3"
   }
 }
