@@ -17,7 +17,20 @@
     <li><a href="/three">Three.js Test</a></li>
     <li><a href="/three-webxr">Three.js WebXR</a> - https://threejs.org/examples/?q=cubes#webxr_vr_cubes</li>
     <li><a href="/ar-hittest">AR Hittest WebXR</a> - https://threejs.org/examples/?q=webxr#webxr_ar_hittest</li>
+    <li><a href="/ratk-hittest">RATK - AR Hittest WebXR</a></li>
   </ul>
+
+  <script type="importmap">
+    {
+        "imports": {
+            "three": "./build/three.module.js",
+            "three/addons/": "./jsm/",
+            "lodash-es": "./lodash-es/lodash.js"
+        }
+    }
+  </script>
+
+  <script type="module" src="js/ratk-hittest.js"></script>
 </body>
 
 </html>
