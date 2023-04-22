@@ -21,8 +21,12 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use('/node_modules', express.static('node_modules'));
+
 app.use('/build/', express.static(path.join(__dirname, 'node_modules/three/build')))
 app.use('/jsm/', express.static(path.join(__dirname, 'node_modules/three/examples/jsm')))
+app.use('/ratk/', express.static(path.join(__dirname, 'node_modules/ratk')))
+app.use('/lodash-es/', express.static(path.join(__dirname, 'node_modules/lodash-es')))
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);

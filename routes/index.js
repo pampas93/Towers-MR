@@ -18,5 +18,9 @@ router.get('/ar-hittest', function (req, res, next) {
   res.render('ar-hittest', {});
 });
 
+router.get('/ratk-hittest', function (req, res, next) {
+  res.render('ratk-hittest', {});
+});
+
 
 module.exports = router;
