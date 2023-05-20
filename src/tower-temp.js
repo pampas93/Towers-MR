@@ -5,53 +5,18 @@ import { XRHandModelFactory } from 'three/addons/webxr/XRHandModelFactory.js';
 
 class Stage {
     constructor() {
-        // container
-        this.render = function () {
-            this.renderer.render(this.scene, this.camera);
-        };
-        this.add = function (elem) {
-            this.scene.add(elem);
-        };
-        this.remove = function (elem) {
-            this.scene.remove(elem);
-        };
+
         this.container = document.getElementById('game');
-        // renderer
-        this.renderer = new THREE.WebGLRenderer({ antialias: true });
-        this.renderer.setPixelRatio(window.devicePixelRatio);
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
+
         this.renderer.setClearColor('#D0CBC7', 1);
-        this.renderer.xr.enabled = true;
 
-        // this.container.appendChild(this.renderer.domElement);
+        this.container.appendChild(this.renderer.domElement);
 
-        // scene
-        this.scene = new THREE.Scene();
-        // camera
-        let aspect = window.innerWidth / window.innerHeight;
-        let d = 20;
-        this.camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 10);
-        this.camera.position.x = 2;
-        this.camera.position.y = 2;
-        this.camera.position.z = 2;
-        this.camera.lookAt(new THREE.Vector3(0, 0, 0));
-        //light
-        this.light = new THREE.DirectionalLight(0xffffff, 0.5);
-        this.light.position.set(0, 499, 0);
-        this.scene.add(this.light);
-        this.softLight = new THREE.AmbientLight(0xffffff, 0.4);
-        this.scene.add(this.softLight);
-        window.addEventListener('resize', () => this.onResize());
-        this.onResize();
     }
-    // setCamera(y, speed = 0.3) {
-    //     TweenLite.to(this.camera.position, speed, { y: y + 4, ease: Power1.easeInOut });
-    //     TweenLite.to(this.camera.lookAt, speed, { y: y, ease: Power1.easeInOut });
-    // }
-    onResize() {
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.camera.aspect = window.innerWidth / window.innerHeight;
-        this.camera.updateProjectionMatrix();
+
+    setCamera(y, speed = 0.3) {
+        TweenLite.to(this.camera.position, speed, { y: y + 4, ease: Power1.easeInOut });
+        TweenLite.to(this.camera.lookAt, speed, { y: y, ease: Power1.easeInOut });
     }
 }
 class Block {
@@ -174,23 +139,22 @@ class Game {
         this.blocks = [];
         this.state = this.STATES.LOADING;
         this.mainContainer = document.getElementById('container');
-        this.scoreContainer = document.getElementById('score');
-        this.startButton = document.getElementById('start-button');
-        this.instructions = document.getElementById('instructions');
-        this.scoreContainer.innerHTML = '0';
+        // this.scoreContainer = document.getElementById('score');
+        // this.scoreContainer.innerHTML = '0';
+
         this.newBlocks = new THREE.Group();
         this.placedBlocks = new THREE.Group();
         this.choppedBlocks = new THREE.Group();
+
         this.stage = new Stage();
         this.stage.add(this.newBlocks);
         this.stage.add(this.placedBlocks);
         this.stage.add(this.choppedBlocks);
 
-        this.mainContainer.appendChild(VRButton.createButton(this.renderer));
-
         this.addBlock();
         this.tick();
         this.updateState(this.STATES.READY);
+
         document.addEventListener('keydown', e => {
             if (e.keyCode == 32)
                 this.onAction();
@@ -206,11 +170,12 @@ class Game {
         });
     }
     updateState(newState) {
-        for (let key in this.STATES)
-            this.mainContainer.classList.remove(this.STATES[key]);
-        this.mainContainer.classList.add(newState);
+        // for (let key in this.STATES) // Pemp maybe?
+        //     this.mainContainer.classList.remove(this.STATES[key]);
+        // this.mainContainer.classList.add(newState);
         this.state = newState;
     }
+
     onAction() {
         switch (this.state) {
             case this.STATES.READY:
@@ -219,36 +184,39 @@ class Game {
             case this.STATES.PLAYING:
                 this.placeBlock();
                 break;
-            case this.STATES.ENDED:
-                this.restartGame();
-                break;
+            // case this.STATES.ENDED:
+            //     this.restartGame();
+            //     break;
         }
     }
+
     startGame() {
         if (this.state != this.STATES.PLAYING) {
-            this.scoreContainer.innerHTML = '0';
+            // this.scoreContainer.innerHTML = '0';
             this.updateState(this.STATES.PLAYING);
             this.addBlock();
         }
     }
-    restartGame() {
-        this.updateState(this.STATES.RESETTING);
-        let oldBlocks = this.placedBlocks.children;
-        let removeSpeed = 0.2;
-        let delayAmount = 0.02;
-        for (let i = 0; i < oldBlocks.length; i++) {
-            TweenLite.to(oldBlocks[i].scale, removeSpeed, { x: 0, y: 0, z: 0, delay: (oldBlocks.length - i) * delayAmount, ease: Power1.easeIn, onComplete: () => this.placedBlocks.remove(oldBlocks[i]) });
-            TweenLite.to(oldBlocks[i].rotation, removeSpeed, { y: 0.5, delay: (oldBlocks.length - i) * delayAmount, ease: Power1.easeIn });
-        }
-        let cameraMoveSpeed = removeSpeed * 2 + (oldBlocks.length * delayAmount);
-        // this.stage.setCamera(2, cameraMoveSpeed);
-        let countdown = { value: this.blocks.length - 1 };
-        TweenLite.to(countdown, cameraMoveSpeed, { value: 0, onUpdate: () => { this.scoreContainer.innerHTML = String(Math.round(countdown.value)); } });
-        this.blocks = this.blocks.slice(0, 1);
-        setTimeout(() => {
-            this.startGame();
-        }, cameraMoveSpeed * 1000);
-    }
+
+    // restartGame() {
+    //     this.updateState(this.STATES.RESETTING);
+    //     let oldBlocks = this.placedBlocks.children;
+    //     let removeSpeed = 0.2;
+    //     let delayAmount = 0.02;
+    //     for (let i = 0; i < oldBlocks.length; i++) {
+    //         TweenLite.to(oldBlocks[i].scale, removeSpeed, { x: 0, y: 0, z: 0, delay: (oldBlocks.length - i) * delayAmount, ease: Power1.easeIn, onComplete: () => this.placedBlocks.remove(oldBlocks[i]) });
+    //         TweenLite.to(oldBlocks[i].rotation, removeSpeed, { y: 0.5, delay: (oldBlocks.length - i) * delayAmount, ease: Power1.easeIn });
+    //     }
+    //     let cameraMoveSpeed = removeSpeed * 2 + (oldBlocks.length * delayAmount);
+    //     // this.stage.setCamera(2, cameraMoveSpeed);
+    //     let countdown = { value: this.blocks.length - 1 };
+    //     TweenLite.to(countdown, cameraMoveSpeed, { value: 0, onUpdate: () => { this.scoreContainer.innerHTML = String(Math.round(countdown.value)); } });
+    //     this.blocks = this.blocks.slice(0, 1);
+    //     setTimeout(() => {
+    //         this.startGame();
+    //     }, cameraMoveSpeed * 1000);
+    // }
+
     placeBlock() {
         let currentBlock = this.blocks[this.blocks.length - 1];
         let newBlocks = currentBlock.place();
@@ -276,29 +244,25 @@ class Game {
         }
         this.addBlock();
     }
+
     addBlock() {
         let lastBlock = this.blocks[this.blocks.length - 1];
         if (lastBlock && lastBlock.state == lastBlock.STATES.MISSED) {
             return this.endGame();
         }
-        this.scoreContainer.innerHTML = String(this.blocks.length - 1);
+        // this.scoreContainer.innerHTML = String(this.blocks.length - 1);
         let newKidOnTheBlock = new Block(lastBlock);
         this.newBlocks.add(newKidOnTheBlock.mesh);
         this.blocks.push(newKidOnTheBlock);
         // this.stage.setCamera(this.blocks.length * 2);
-        if (this.blocks.length >= 5)
-            this.instructions.classList.add('hide');
     }
+
     endGame() {
         this.updateState(this.STATES.ENDED);
     }
+
     tick() {
         this.blocks[this.blocks.length - 1].tick();
-        this.stage.render();
-        this.renderer.setAnimationLoop(function () {
-            this.renderer.render(this.scene, this.camera);
-            this.tick();
-        });
     }
 }
 let game = new Game();
