@@ -62,8 +62,6 @@ function init() {
     renderer.setClearColor('#D0CBC7', 1);
 
     window.addEventListener('resize', onWindowResize);
-
-    tween = new TimelineMax({ repeat: -1, yoyo: true });
 }
 
 function animate() {
@@ -225,8 +223,8 @@ class Game {
         this.blocks = [];
         this.state = this.STATES.LOADING;
         // this.mainContainer = document.getElementById('container');
-        // this.scoreContainer = document.getElementById('score');
-        // this.scoreContainer.innerHTML = '0';
+        this.scoreContainer = document.getElementById('score');
+        this.scoreContainer.innerHTML = '0';
 
         this.newBlocks = new THREE.Group();
         this.placedBlocks = new THREE.Group();
@@ -281,7 +279,7 @@ class Game {
     startGame() {
         console.log('startGame func');
         if (this.state != this.STATES.PLAYING) {
-            // this.scoreContainer.innerHTML = '0';
+            this.scoreContainer.innerHTML = '0';
             this.updateState(this.STATES.PLAYING);
             this.addBlock();
         }
@@ -342,7 +340,7 @@ class Game {
             console.log('Pemp game ending from addBlock');
             return this.endGame();
         }
-        // this.scoreContainer.innerHTML = String(this.blocks.length - 1);
+        this.scoreContainer.innerHTML = String(this.blocks.length - 1);
         let newKidOnTheBlock = new Block(lastBlock);
         this.newBlocks.add(newKidOnTheBlock.mesh);
         this.blocks.push(newKidOnTheBlock);
