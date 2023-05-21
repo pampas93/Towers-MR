@@ -3,12 +3,15 @@ import { VRButton } from 'three/addons/webxr/VRButton.js';
 import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
 import { XRHandModelFactory } from 'three/addons/webxr/XRHandModelFactory.js';
 
+import SpriteText from 'three-spritetext';
+
 import './style.css';
 
 let container;
 let camera, scene, raycaster, renderer, light;
 let game;
 let cube;
+let scoreText;
 
 let controller, controllerGrip;
 let INTERSECTED;
@@ -55,11 +58,22 @@ function init() {
     scene.add(controllerGrip1);
     scene.add(controllerModel1);
 
-    camera.position.x = -6;
-    camera.position.y = 12;
-    camera.position.z = -20;
-    camera.lookAt(new THREE.Vector3(-3, 0, -3)); // pemp maybe?
+    // camera.position.x = -6;
+    // camera.position.y = 12;
+    // camera.position.z = -20;
+    // camera.lookAt(new THREE.Vector3(-3, 0, -3)); // pemp maybe?
     renderer.setClearColor('#D0CBC7', 1);
+
+    // Create the text sprite
+    scoreText = new SpriteText('Hello World', 2, 'red');
+    // textSprite.backgroundColor = true;
+    scoreText.fontSize = 24;
+    // textSprite.strokeWidth = 1;
+    // textSprite.strokeColor = 'white';
+    scoreText.fontFace = 'Comfortaa'
+    scoreText.borderRadius = 2;
+    scoreText.position.set(0, 0, 0);
+    scene.add(scoreText);
 
     window.addEventListener('resize', onWindowResize);
 }
@@ -225,6 +239,7 @@ class Game {
         // this.mainContainer = document.getElementById('container');
         // this.scoreContainer = document.getElementById('score');
         // this.scoreContainer.innerHTML = '0';
+        this.setScore(0);
 
         this.newBlocks = new THREE.Group();
         this.placedBlocks = new THREE.Group();
@@ -276,10 +291,15 @@ class Game {
         }
     }
 
+    setScore(score) {
+        scoreText.text = 'Score: ' + score;
+    }
+
     startGame() {
         console.log('startGame func');
         if (this.state != this.STATES.PLAYING) {
             // this.scoreContainer.innerHTML = '0';
+            this.setScore(0);
             this.updateState(this.STATES.PLAYING);
             this.addBlock();
         }
@@ -341,6 +361,7 @@ class Game {
             return this.endGame();
         }
         // this.scoreContainer.innerHTML = String(this.blocks.length - 1);
+        this.setScore(this.blocks.length - 1);
         let newKidOnTheBlock = new Block(lastBlock);
         this.newBlocks.add(newKidOnTheBlock.mesh);
         this.blocks.push(newKidOnTheBlock);
