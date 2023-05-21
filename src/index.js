@@ -10,8 +10,6 @@ let camera, scene, raycaster, renderer, light;
 let game;
 let cube;
 
-let tween;
-
 let controller, controllerGrip;
 let INTERSECTED;
 const tempMatrix = new THREE.Matrix4();
@@ -144,6 +142,7 @@ class Block {
         this.material = new THREE.MeshToonMaterial({ color: this.color, shading: THREE.MeshPhongMaterial });
         this.mesh = new THREE.Mesh(geometry, this.material);
         this.mesh.position.set(this.position.x, this.position.y + (this.state == this.STATES.ACTIVE ? 0 : 0), this.position.z);
+        console.log('Pemp block state: ' + this.state);
         if (this.state == this.STATES.ACTIVE) {
             this.position[this.workingPlane] = Math.random() > 0.5 ? -this.MOVE_AMOUNT : this.MOVE_AMOUNT;
         }
@@ -204,6 +203,7 @@ class Block {
 
     tick() {
         if (this.state == this.STATES.ACTIVE) {
+            console.log('Pemp ticking');
             let value = this.position[this.workingPlane];
             if (value > this.MOVE_AMOUNT || value < -this.MOVE_AMOUNT)
                 this.reverseDirection();
@@ -279,6 +279,7 @@ class Game {
     }
 
     startGame() {
+        console.log('startGame func');
         if (this.state != this.STATES.PLAYING) {
             // this.scoreContainer.innerHTML = '0';
             this.updateState(this.STATES.PLAYING);
@@ -306,6 +307,7 @@ class Game {
     // }
 
     placeBlock() {
+        console.log('placeBlock()');
         let currentBlock = this.blocks[this.blocks.length - 1];
         let newBlocks = currentBlock.place();
         this.newBlocks.remove(currentBlock.mesh);
@@ -327,15 +329,14 @@ class Game {
             else {
                 positionParams[newBlocks.plane] = '-=' + (40 * Math.abs(newBlocks.direction));
             }
-            // TweenLite.to(newBlocks.chopped.position, 1, positionParams);
-            tween.to(newBlocks.chopped.position, 1, positionParams);
-            // TweenLite.to(newBlocks.chopped.rotation, 1, rotationParams);
-            tween.to(newBlocks.chopped.rotation, 1, rotationParams);
+            TweenLite.to(newBlocks.chopped.position, 1, positionParams);
+            TweenLite.to(newBlocks.chopped.rotation, 1, rotationParams);
         }
         this.addBlock();
     }
 
     addBlock() {
+        console.log('addBlock()');
         let lastBlock = this.blocks[this.blocks.length - 1];
         if (lastBlock && lastBlock.state == lastBlock.STATES.MISSED) {
             console.log('Pemp game ending from addBlock');
@@ -354,5 +355,6 @@ class Game {
 
     tick() {
         this.blocks[this.blocks.length - 1].tick();
+        requestAnimationFrame(() => { this.tick() });
     }
 }
