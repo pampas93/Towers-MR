@@ -120,7 +120,7 @@ class Block {
 
         // set the dimensions from the target block, or defaults.
         this.dimension.width = this.targetBlock ? this.targetBlock.dimension.width : 10;
-        this.dimension.height = this.targetBlock ? this.targetBlock.dimension.height : 2;
+        this.dimension.height = this.targetBlock ? this.targetBlock.dimension.height : 1;
         this.dimension.depth = this.targetBlock ? this.targetBlock.dimension.depth : 10;
         this.position.x = this.targetBlock ? this.targetBlock.position.x : 0;
         this.position.y = this.dimension.height * this.index;
@@ -274,6 +274,7 @@ class Game {
         // this.mainContainer.classList.add(newState);
         console.log('Pemp updateState to ' + newState);
         this.state = newState;
+        this.setScore(this.blocks.length - 1);
     }
 
     onAction() {
@@ -292,7 +293,8 @@ class Game {
     }
 
     setScore(score) {
-        scoreText.text = 'Score: ' + score;
+        const pretext = this.state != this.STATES.ENDED ? 'Score: ' : 'Congrats on ';
+        scoreText.text = pretext + score;
     }
 
     startGame() {
