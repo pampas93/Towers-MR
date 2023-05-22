@@ -20,9 +20,6 @@ const tempMatrix = new THREE.Matrix4();
 
 let hitTestSource = null;
 let hitTestSourceRequested = false;
-let reticle;
-let beginPlacement = false;
-let placementDone = false;
 
 init();
 animate();
@@ -74,13 +71,6 @@ function init() {
     // controller.addEventListener('select', onSelect);
     scene.add(controller);
 
-    reticle = new THREE.Mesh(
-        new THREE.RingGeometry(0.15, 0.2, 32).rotateX(- Math.PI / 2),
-        new THREE.MeshBasicMaterial()
-    );
-    reticle.matrixAutoUpdate = false;
-    reticle.visible = false;
-    scene.add(reticle);
 
     // camera.position.x = -6;
     // camera.position.y = 12;
@@ -110,7 +100,7 @@ function render(timestamp, frame) {
     // cube.rotation.x += 0.01;
     // cube.rotation.y += 0.01;
 
-    if (frame && beginPlacement) {
+    if (frame && game && game.state == game.STATES.PLACEMENT) {
         const referenceSpace = renderer.xr.getReferenceSpace();
         const session = renderer.xr.getSession();
 
@@ -131,10 +121,11 @@ function render(timestamp, frame) {
             const hitTestResults = frame.getHitTestResults(hitTestSource);
             if (hitTestResults.length) {
                 const hit = hitTestResults[0];
-                reticle.visible = true;
-                reticle.matrix.fromArray(hit.getPose(referenceSpace).transform.matrix);
+                game.placingFirstBlock(referenceSpace, hit);
+                // reticle.visible = true;
+                // reticle.matrix.fromArray(hit.getPose(referenceSpace).transform.matrix);
             } else {
-                reticle.visible = false;
+                // reticle.visible = false;
             }
         }
     }
@@ -165,6 +156,7 @@ class Block {
         // set size and position
         this.STATES = { ACTIVE: 'active', STOPPED: 'stopped', MISSED: 'missed' };
         this.MOVE_AMOUNT = 12;
+        this.defaultSize = { width: 0.5, height: 0.06, depth: 0.5 };
         this.dimension = { width: 0, height: 0, depth: 0 };
         this.position = { x: 0, y: 0, z: 0 };
         this.targetBlock = block;
@@ -173,9 +165,12 @@ class Block {
         this.workingDimension = this.index % 2 ? 'width' : 'depth';
 
         // set the dimensions from the target block, or defaults.
-        this.dimension.width = this.targetBlock ? this.targetBlock.dimension.width : 10;
-        this.dimension.height = this.targetBlock ? this.targetBlock.dimension.height : 1;
-        this.dimension.depth = this.targetBlock ? this.targetBlock.dimension.depth : 10;
+        this.dimension.width = this.targetBlock ?
+            this.targetBlock.dimension.width : this.defaultSize.width;
+        this.dimension.height = this.targetBlock ?
+            this.targetBlock.dimension.height : this.defaultSize.height;
+        this.dimension.depth = this.targetBlock ?
+            this.targetBlock.dimension.depth : this.defaultSize.depth;
         this.position.x = this.targetBlock ? this.targetBlock.position.x : 0;
         this.position.y = this.dimension.height * this.index;
         this.position.z = this.targetBlock ? this.targetBlock.position.z : 0;
@@ -267,6 +262,18 @@ class Block {
         return blocksToReturn;
     }
 
+    setPosition(transform) {
+        this.mesh.position.set(
+            transform.position.x - this.defaultSize.width / 2,
+            transform.position.y - this.defaultSize.height / 2,
+            transform.position.z - this.defaultSize.depth / 2);
+        this.mesh.quaternion.set(
+            transform.orientation.x,
+            transform.orientation.y,
+            transform.orientation.z,
+            transform.orientation.w);
+    }
+
     tick() {
         if (this.state == this.STATES.ACTIVE) {
             console.log('Pemp ticking');
@@ -282,21 +289,18 @@ class Block {
 class Game {
     constructor() {
         this.STATES = {
-            'LOADING': 'loading',
+            'PLACEMENT': 'placement',
             'PLAYING': 'playing',
             'READY': 'ready',
             'ENDED': 'ended',
             'RESETTING': 'resetting'
         };
         this.blocks = [];
-        this.state = this.STATES.LOADING;
+        this.state = this.STATES.PLACEMENT;
         // this.mainContainer = document.getElementById('container');
         // this.scoreContainer = document.getElementById('score');
         // this.scoreContainer.innerHTML = '0';
         this.setScore(0);
-
-        beginPlacement = true;
-        placementDone = false;
 
         this.newBlocks = new THREE.Group();
         this.placedBlocks = new THREE.Group();
@@ -307,15 +311,19 @@ class Game {
         this.stage.add(this.placedBlocks);
         this.stage.add(this.choppedBlocks);
 
+        this.firstBlock = new Block(null);
+        this.newBlocks.add(this.firstBlock.mesh);
+        this.blocks.push(this.firstBlock);
+
         // this.addBlock();
         // this.tick();
         // this.updateState(this.STATES.READY);
 
-        document.addEventListener('keydown', e => {
-            if (e.keyCode == 32) {
-                // this.onAction();
-            }
-        });
+        // document.addEventListener('keydown', e => {
+        //     if (e.keyCode == 32) {
+        //         // this.onAction();
+        //     }
+        // });
         // document.addEventListener('click', e => {
         //     this.onAction();
         // });
@@ -412,6 +420,14 @@ class Game {
             TweenLite.to(newBlocks.chopped.rotation, 1, rotationParams);
         }
         this.addBlock();
+    }
+
+    placingFirstBlock(referenceSpace, hit) {
+        if (this.firstBlock) {
+            const transform = hit.getPose(referenceSpace).transform;
+            // console.log(transform.position);
+            this.firstBlock.setPosition(transform);
+        }
     }
 
     addBlock() {
