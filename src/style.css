@@ -15,7 +15,7 @@ body {
     height: 100%;
 }
 
-#container #score {
+/* #container #score {
     position: absolute;
     top: 20px;
     width: 100%;
@@ -121,4 +121,4 @@ body {
 
 #container.ended .game-over p {
     transition-delay: 0.3s;
-}
+} */

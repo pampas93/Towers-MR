@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { VRButton } from 'three/addons/webxr/VRButton.js';
+import { ARButton } from 'three/addons/webxr/ARButton.js';
 import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
 import { XRHandModelFactory } from 'three/addons/webxr/XRHandModelFactory.js';
 
@@ -17,6 +18,12 @@ let controller, controllerGrip;
 let INTERSECTED;
 const tempMatrix = new THREE.Matrix4();
 
+let hitTestSource = null;
+let hitTestSourceRequested = false;
+let reticle;
+let beginPlacement = false;
+let placementDone = false;
+
 init();
 animate();
 
@@ -26,16 +33,21 @@ function init() {
         75,
         window.innerWidth / window.innerHeight,
         0.1,
-        1000
+        100
     );
 
-    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.outputEncoding = THREE.sRGBEncoding;
     renderer.xr.enabled = true;
     // document.body.appendChild(renderer.domElement);
 
-    document.body.appendChild(VRButton.createButton(renderer, () => {
+    // document.body.appendChild(VRButton.createButton(renderer, () => {
+    //     game = new Game();
+    // }));
+    document.body.appendChild(ARButton.createButton(renderer, {
+        requiredFeatures: ['hit-test']
+    }, () => {
         game = new Game();
     }));
 
@@ -58,11 +70,23 @@ function init() {
     scene.add(controllerGrip1);
     scene.add(controllerModel1);
 
+    controller = renderer.xr.getController(0);
+    // controller.addEventListener('select', onSelect);
+    scene.add(controller);
+
+    reticle = new THREE.Mesh(
+        new THREE.RingGeometry(0.15, 0.2, 32).rotateX(- Math.PI / 2),
+        new THREE.MeshBasicMaterial()
+    );
+    reticle.matrixAutoUpdate = false;
+    reticle.visible = false;
+    scene.add(reticle);
+
     // camera.position.x = -6;
     // camera.position.y = 12;
     // camera.position.z = -20;
     // camera.lookAt(new THREE.Vector3(-3, 0, -3)); // pemp maybe?
-    renderer.setClearColor('#D0CBC7', 1);
+    // renderer.setClearColor('#D0CBC7', 1);
 
     // Create the text sprite
     scoreText = new SpriteText('Hello World', 2, 'red');
@@ -82,9 +106,39 @@ function animate() {
     renderer.setAnimationLoop(render);
 }
 
-function render() {
+function render(timestamp, frame) {
     // cube.rotation.x += 0.01;
     // cube.rotation.y += 0.01;
+
+    if (frame && beginPlacement) {
+        const referenceSpace = renderer.xr.getReferenceSpace();
+        const session = renderer.xr.getSession();
+
+        if (hitTestSourceRequested === false) {
+            session.requestReferenceSpace('viewer').then(function (referenceSpace) {
+                session.requestHitTestSource({ space: referenceSpace }).then(function (source) {
+                    hitTestSource = source;
+                });
+            });
+
+            session.addEventListener('end', function () {
+                hitTestSourceRequested = false;
+                hitTestSource = null;
+            });
+            hitTestSourceRequested = true;
+        }
+        if (hitTestSource) {
+            const hitTestResults = frame.getHitTestResults(hitTestSource);
+            if (hitTestResults.length) {
+                const hit = hitTestResults[0];
+                reticle.visible = true;
+                reticle.matrix.fromArray(hit.getPose(referenceSpace).transform.matrix);
+            } else {
+                reticle.visible = false;
+            }
+        }
+    }
+
     renderer.render(scene, camera);
 }
 
@@ -241,6 +295,9 @@ class Game {
         // this.scoreContainer.innerHTML = '0';
         this.setScore(0);
 
+        beginPlacement = true;
+        placementDone = false;
+
         this.newBlocks = new THREE.Group();
         this.placedBlocks = new THREE.Group();
         this.choppedBlocks = new THREE.Group();
@@ -250,13 +307,14 @@ class Game {
         this.stage.add(this.placedBlocks);
         this.stage.add(this.choppedBlocks);
 
-        this.addBlock();
-        this.tick();
-        this.updateState(this.STATES.READY);
+        // this.addBlock();
+        // this.tick();
+        // this.updateState(this.STATES.READY);
 
         document.addEventListener('keydown', e => {
-            if (e.keyCode == 32)
-                this.onAction();
+            if (e.keyCode == 32) {
+                // this.onAction();
+            }
         });
         // document.addEventListener('click', e => {
         //     this.onAction();
@@ -268,6 +326,7 @@ class Game {
         //     // insta-lose, will figure it out later.
         // });
     }
+
     updateState(newState) {
         // for (let key in this.STATES) // Pemp maybe?
         //     this.mainContainer.classList.remove(this.STATES[key]);
