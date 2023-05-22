@@ -68,7 +68,9 @@ function init() {
     scene.add(controllerModel1);
 
     controller = renderer.xr.getController(0);
-    // controller.addEventListener('select', onSelect);
+    controller.addEventListener('select', () => {
+        game.onAction();
+    });
     scene.add(controller);
 
 
@@ -155,7 +157,7 @@ class Block {
     constructor(block) {
         // set size and position
         this.STATES = { ACTIVE: 'active', STOPPED: 'stopped', MISSED: 'missed' };
-        this.MOVE_AMOUNT = 12;
+        this.MOVE_AMOUNT = 1;
         this.defaultSize = { width: 0.5, height: 0.06, depth: 0.5 };
         this.dimension = { width: 0, height: 0, depth: 0 };
         this.position = { x: 0, y: 0, z: 0 };
@@ -171,9 +173,10 @@ class Block {
             this.targetBlock.dimension.height : this.defaultSize.height;
         this.dimension.depth = this.targetBlock ?
             this.targetBlock.dimension.depth : this.defaultSize.depth;
-        this.position.x = this.targetBlock ? this.targetBlock.position.x : 0;
-        this.position.y = this.dimension.height * this.index;
-        this.position.z = this.targetBlock ? this.targetBlock.position.z : 0;
+
+        this.position.x = this.targetBlock ? this.targetBlock.mesh.position.x : 0;
+        this.position.y = this.targetBlock ? this.targetBlock.mesh.position.y + (this.dimension.height * this.index) : 0;
+        this.position.z = this.targetBlock ? this.targetBlock.mesh.position.z : 0;
         this.colorOffset = this.targetBlock ? this.targetBlock.colorOffset : Math.round(Math.random() * 100);
 
         // set color
@@ -192,9 +195,9 @@ class Block {
         this.state = this.index > 1 ? this.STATES.ACTIVE : this.STATES.STOPPED;
 
         // set direction
-        this.speed = -0.1 - (this.index * 0.005);
-        if (this.speed < -4)
-            this.speed = -4;
+        this.speed = -0.01 - (this.index * 0.002);
+        if (this.speed < -1)
+            this.speed = -1;
         this.direction = this.speed;
 
         // create block
@@ -203,14 +206,14 @@ class Block {
         this.material = new THREE.MeshToonMaterial({ color: this.color, shading: THREE.MeshPhongMaterial });
         this.mesh = new THREE.Mesh(geometry, this.material);
         this.mesh.position.set(this.position.x, this.position.y + (this.state == this.STATES.ACTIVE ? 0 : 0), this.position.z);
+        if (this.targetBlock) {
+            let targetRotation = this.targetBlock.mesh.quaternion;
+            this.mesh.quaternion.set(targetRotation.x, targetRotation.y, targetRotation.z, targetRotation.w);
+        }
         console.log('Pemp block state: ' + this.state);
         if (this.state == this.STATES.ACTIVE) {
             this.position[this.workingPlane] = Math.random() > 0.5 ? -this.MOVE_AMOUNT : this.MOVE_AMOUNT;
         }
-    }
-
-    reverseDirection() {
-        this.direction = this.direction > 0 ? this.speed : Math.abs(this.speed);
     }
 
     place() {
@@ -274,6 +277,10 @@ class Block {
             transform.orientation.w);
     }
 
+    reverseDirection() {
+        this.direction = this.direction > 0 ? this.speed : Math.abs(this.speed);
+    }
+
     tick() {
         if (this.state == this.STATES.ACTIVE) {
             console.log('Pemp ticking');
@@ -316,7 +323,7 @@ class Game {
         this.blocks.push(this.firstBlock);
 
         // this.addBlock();
-        // this.tick();
+        this.tick();
         // this.updateState(this.STATES.READY);
 
         // document.addEventListener('keydown', e => {
@@ -347,9 +354,12 @@ class Game {
     onAction() {
         console.log('Pemp current state:' + this.state);
         switch (this.state) {
-            case this.STATES.READY:
+            case this.STATES.PLACEMENT:
                 this.startGame();
                 break;
+            // case this.STATES.READY:
+            //     this.startGame();
+            //     break;
             case this.STATES.PLAYING:
                 this.placeBlock();
                 break;
@@ -450,7 +460,9 @@ class Game {
     }
 
     tick() {
-        this.blocks[this.blocks.length - 1].tick();
+        if (this.blocks.length > 0) {
+            this.blocks[this.blocks.length - 1].tick();
+        }
         requestAnimationFrame(() => { this.tick() });
     }
 }
