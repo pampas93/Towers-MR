@@ -175,7 +175,7 @@ class Block {
             this.targetBlock.dimension.depth : this.defaultSize.depth;
 
         this.position.x = this.targetBlock ? this.targetBlock.mesh.position.x : 0;
-        this.position.y = this.targetBlock ? this.targetBlock.mesh.position.y + (this.dimension.height * this.index) : 0;
+        this.position.y = this.targetBlock ? this.targetBlock.mesh.position.y + (this.dimension.height * this.index) / 2 : 0;
         this.position.z = this.targetBlock ? this.targetBlock.mesh.position.z : 0;
         this.colorOffset = this.targetBlock ? this.targetBlock.colorOffset : Math.round(Math.random() * 100);
 
@@ -270,11 +270,11 @@ class Block {
             transform.position.x - this.defaultSize.width / 2,
             transform.position.y - this.defaultSize.height / 2,
             transform.position.z - this.defaultSize.depth / 2);
-        this.mesh.quaternion.set(
-            transform.orientation.x,
-            transform.orientation.y,
-            transform.orientation.z,
-            transform.orientation.w);
+        // this.mesh.quaternion.set(
+        //     transform.orientation.x,
+        //     transform.orientation.y,
+        //     transform.orientation.z,
+        //     transform.orientation.w);
     }
 
     reverseDirection() {
@@ -287,6 +287,7 @@ class Block {
             let value = this.position[this.workingPlane];
             if (value > this.MOVE_AMOUNT || value < -this.MOVE_AMOUNT)
                 this.reverseDirection();
+            // FYI, mesh.pos and pos is both having same values.
             this.position[this.workingPlane] += this.direction;
             this.mesh.position[this.workingPlane] = this.position[this.workingPlane];
         }
