@@ -174,9 +174,9 @@ class Block {
         this.dimension.depth = this.targetBlock ?
             this.targetBlock.dimension.depth : this.defaultSize.depth;
 
-        this.position.x = this.targetBlock ? this.targetBlock.mesh.position.x : 0;
-        this.position.y = this.targetBlock ? this.targetBlock.mesh.position.y + (this.dimension.height * this.index) / 2 : 0;
-        this.position.z = this.targetBlock ? this.targetBlock.mesh.position.z : 0;
+        this.position.x = this.targetBlock ? this.targetBlock.position.x : 0;
+        this.position.y = this.targetBlock ? this.targetBlock.position.y + this.dimension.height : 0;
+        this.position.z = this.targetBlock ? this.targetBlock.position.z : 0;
         this.colorOffset = this.targetBlock ? this.targetBlock.colorOffset : Math.round(Math.random() * 100);
 
         // set color
@@ -195,7 +195,7 @@ class Block {
         this.state = this.index > 1 ? this.STATES.ACTIVE : this.STATES.STOPPED;
 
         // set direction
-        this.speed = -0.01 - (this.index * 0.002);
+        this.speed = -0.01 - (this.index * 0.0007);
         if (this.speed < -1)
             this.speed = -1;
         this.direction = this.speed;
