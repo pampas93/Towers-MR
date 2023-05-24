@@ -218,12 +218,14 @@ class Block {
 
     place() {
         this.state = this.STATES.STOPPED;
-        let overlap = this.targetBlock.dimension[this.workingDimension] - Math.abs(this.position[this.workingPlane] - this.targetBlock.position[this.workingPlane]);
+        let overlap = this.targetBlock.dimension[this.workingDimension]
+            - Math.abs(this.position[this.workingPlane] - this.targetBlock.position[this.workingPlane]);
         let blocksToReturn = {
             plane: this.workingPlane,
             direction: this.direction
         };
-        if (this.dimension[this.workingDimension] - overlap < 0.3) {
+        let minOverlapCheck = 0.03 * this.defaultSize.depth;
+        if (this.dimension[this.workingDimension] - overlap < minOverlapCheck) {
             overlap = this.dimension[this.workingDimension];
             blocksToReturn.bonus = true;
             this.position.x = this.targetBlock.position.x;
