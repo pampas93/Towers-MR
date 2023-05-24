@@ -211,9 +211,9 @@ class Block {
             this.mesh.quaternion.set(targetRotation.x, targetRotation.y, targetRotation.z, targetRotation.w);
         }
         console.log('Pemp block state: ' + this.state);
-        if (this.state == this.STATES.ACTIVE) {
-            this.position[this.workingPlane] = Math.random() > 0.5 ? -this.MOVE_AMOUNT : this.MOVE_AMOUNT;
-        }
+
+        this.topLimit = this.position[this.workingPlane] - this.MOVE_AMOUNT;
+        this.bottomLimit = this.position[this.workingPlane] + this.MOVE_AMOUNT;
     }
 
     place() {
@@ -266,10 +266,14 @@ class Block {
     }
 
     setPosition(transform) {
-        this.mesh.position.set(
-            transform.position.x - this.defaultSize.width / 2,
-            transform.position.y - this.defaultSize.height / 2,
-            transform.position.z - this.defaultSize.depth / 2);
+        let x = transform.position.x - this.defaultSize.width / 2;
+        let y = transform.position.y - this.defaultSize.width / 2;
+        let z = transform.position.z - this.defaultSize.width / 2;
+        this.mesh.position.set(x, y, z);
+
+        this.position.x = x;
+        this.position.y = y;
+        this.position.z = z;
         // this.mesh.quaternion.set(
         //     transform.orientation.x,
         //     transform.orientation.y,
@@ -285,7 +289,7 @@ class Block {
         if (this.state == this.STATES.ACTIVE) {
             console.log('Pemp ticking');
             let value = this.position[this.workingPlane];
-            if (value > this.MOVE_AMOUNT || value < -this.MOVE_AMOUNT)
+            if (value < this.topLimit || value > this.bottomLimit)
                 this.reverseDirection();
             // FYI, mesh.pos and pos is both having same values.
             this.position[this.workingPlane] += this.direction;
